@@ -72,10 +72,10 @@ Documents are split using a strict, character-based sliding window approach to b
 
 ## Vector Database Design
 
-The project uses a custom, highly-optimized **In-Memory Hybrid Vector Store**:
-- **Semantic Indexing**: Embeddings are stored in a NumPy `ndarray`. Similarity search is conducted via highly optimized matrix multiplication (cosine similarity).
+The project utilizes a highly-optimized **Hybrid Vector Store** powered by **FAISS**:
+- **Semantic Indexing**: Embeddings are indexed using `faiss-cpu` (`faiss.IndexFlatIP`) for extreme efficiency and scalability when retrieving approximate nearest neighbors via inner-product (cosine similarity on normalized vectors).
 - **Lexical Indexing**: Chunk token frequencies are maintained using Python's `collections.Counter`, alongside a Document Frequency (DF) counter for Inverse Document Frequency (IDF) scoring.
-- **Idempotency**: Documents are tracked by source filename. Re-indexing a file automatically drops prior chunks to prevent duplicate weighting.
+- **Idempotency**: Documents are tracked by source filename. Re-indexing a file seamlessly leverages FAISS `IDSelectorBatch` to dynamically remove prior document chunks without rebuilding the entire matrix, preventing duplicate weighting and preserving application performance.
 
 ## Retrieval Workflow
 
