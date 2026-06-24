@@ -1,10 +1,10 @@
 # KKEdu RAG: Enterprise Retrieval-Augmented Generation
 
-> An enterprise-grade, document-agnostic Retrieval-Augmented Generation (RAG) system built to answer complex questions strictly from provided plain-text context without hallucination.
+> An on-premise, lightweight, and powerful Retrieval-Augmented Generation (RAG) system built to answer complex questions strictly from provided plain-text context without hallucination.
 
 ## Project Overview
 
-KKEdu RAG is a robust, CLI and Web-based retrieval-augmented generation solution designed for enterprise use cases where accuracy and evidence-backing are paramount. The system ingests plain-text documents (like employee handbooks, contracts, or product catalogs) and provides a chat-based interface to query this custom knowledge base. A core design philosophy of this project is **strict adherence to context**—it utilizes a dual-agent architecture (Answerer + Verifier) to ensure that the language model does not hallucinate facts, counts, or categories that are not explicitly present in the source materials.
+KKEdu RAG is a robust, CLI and Web-based retrieval-augmented generation solution designed for enterprise use cases where accuracy, data privacy, and evidence-backing are paramount. As a fully on-premise and lightweight system powered by LanceDB, it ingests plain-text documents (like employee handbooks, contracts, or product catalogs) and provides a chat-based interface to query this custom knowledge base locally, ensuring zero data leakage. A core design philosophy of this project is **strict adherence to context**—it utilizes a dual-agent architecture (Answerer + Verifier) to ensure that the language model does not hallucinate facts, counts, or categories that are not explicitly present in the source materials.
 
 ## Features
 
