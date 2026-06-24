@@ -51,7 +51,7 @@ graph TD
 | **LLM Inference** | Ollama | Local model hosting & inference engine. |
 | **Chat Model** | `gpt-oss:20b-cloud` | Reasoning, drafting, and tool-calling model. |
 | **Embedding Model** | `nomic-embed-text` | High-quality 768-dimensional text embeddings. |
-| **Vector Search** | NumPy | In-memory Cosine Similarity operations. |
+| **Vector Search** | FAISS & NumPy | In-memory FAISS indexing (`IndexFlatIP`) handling NumPy arrays. |
 | **Lexical Search** | Python `collections.Counter` | Term Frequency calculation for BM25. |
 | **Database** | SQLite (`rag_memory.db`) | Persistent conversation memory. |
 | **Web Server** | FastAPI | High-performance async API and SSE streaming layer. |
@@ -101,7 +101,7 @@ kkedu_rag/
 ├── runtime/      # Bootstrap side-effects (tracing, stdout wrappers)
 ├── core/         # Configuration, prompts, pure data sanitization
 ├── llm/          # Ollama shared AsyncOpenAI client singleton
-├── retrieval/    # Hybrid indexing, BM25 logic, VectorStore (NumPy)
+├── retrieval/    # Hybrid indexing, BM25 logic, VectorStore (FAISS & NumPy)
 ├── verification/ # Schema parsing and validation gates against hallucination
 ├── agents/       # Definition of Answerer and Verifier agents
 ├── services/     # Ingestion pipelines and one-turn Q&A logic
