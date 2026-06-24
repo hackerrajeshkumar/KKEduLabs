@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KKEdu RAG</title>
+  <link rel="stylesheet" href="/static/styles.css?v=11" />
+</head>
+<body>
+  <div class="app">
+    <!-- ───────── Sidebar ───────── -->
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="logo-mono">KK</span>
+        <span class="logo-word">Edu<span class="logo-word-dim">RAG</span></span>
+      </div>
+
+      <div class="nav-section">Overview</div>
+      <button class="nav-item active" id="new-chat">
+        <svg viewBox="0 0 24 24" class="icon"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z"/><path d="M12 8v6M9 11h6"/></svg> New chat
+      </button>
+      <button class="nav-item" id="docs-btn">
+        <svg viewBox="0 0 24 24" class="icon"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H17a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H5.5A1.5 1.5 0 0 1 4 18.5z"/><path d="M4 17.5A1.5 1.5 0 0 1 5.5 16H18M8 7h6M8 10.5h6"/></svg>
+        Documents <span id="doc-badge" style="margin-left:auto;font-size:11px;color:var(--text-faint)"></span>
+      </button>
+
+      <div class="nav-section">History</div>
+      <ul class="history" id="history"><li class="empty">No conversations yet</li></ul>
+
+      <div class="sidebar-foot">
+        <div class="nav-section">Support</div>
+        <button class="nav-item" id="clear-btn">
+          <svg viewBox="0 0 24 24" class="icon"><path d="M3 12a9 9 0 1 0 3-6.7L3 8m0 0V3m0 5h5"/></svg> Clear conversation
+        </button>
+        <div class="theme-toggle">
+          <button data-theme="light" class="on">Light</button>
+          <button data-theme="dark">Dark</button>
+          <button data-theme="system">System</button>
+        </div>
+        <div class="user-card" id="user-card" data-menu="profile-menu">
+          <span class="user-avatar">
+            <svg viewBox="0 0 24 24" class="icon"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>
+          </span>
+          <span class="who">Bala<small>balasundaram@ptechnosoft.com</small></span>
+          <svg viewBox="0 0 24 24" class="icon" style="margin-left:auto;color:var(--text-faint)"><path d="m6 9 6 6 6-6"/></svg>
+          <div class="menu up" id="profile-menu" hidden>
+            <button id="open-settings"><svg viewBox="0 0 24 24" class="icon"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Settings</button>
+            <button id="logout-btn"><svg viewBox="0 0 24 24" class="icon"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg> Log out</button>
+          </div>
+        </div>
+        <div class="brandline">© 2026 KKEduLabs · grounded RAG v1.0</div>
+      </div>
+    </aside>
+
+    <!-- ───────── Main ───────── -->
+    <main class="main">
+      <div class="topbar">
+        <div class="crumbs">
+          <span class="model-select" id="model-select">
+            <button class="model-btn" id="model-btn" data-menu="model-menu">
+              <svg viewBox="0 0 24 24" class="icon" style="width:15px;height:15px"><path d="M12 2 2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+              <span id="model-name">model</span>
+              <svg viewBox="0 0 24 24" class="icon"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
+            <div class="menu" id="model-menu" hidden></div>
+          </span>
+        </div>
+        <div class="right">
+          <div class="export-wrap" id="export-wrap">
+            <button class="newtab" id="export-btn" data-menu="export-menu">
+              <svg viewBox="0 0 24 24" class="icon"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+              Export
+              <svg viewBox="0 0 24 24" class="icon"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
+            <div class="menu" id="export-menu" hidden>
+              <button data-fmt="pdf"><svg viewBox="0 0 24 24" class="icon"><path d="M14 3v4a1 1 0 0 0 1 1h4M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M9 13h1.5a1.5 1.5 0 0 1 0 3H9zV13m4.5 0v4m0-4h2m-2 2h1.5M19 13h-2v4"/></svg> PDF</button>
+              <button data-fmt="doc"><svg viewBox="0 0 24 24" class="icon"><path d="M14 3v4a1 1 0 0 0 1 1h4M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M8 13l1.5 5L11 14l1.5 4L14 13"/></svg> Word (.doc)</button>
+              <button data-fmt="md"><svg viewBox="0 0 24 24" class="icon"><path d="M14 3v4a1 1 0 0 0 1 1h4M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M8 16v-4l2 2 2-2v4M16 12v4m0 0 1.5-1.5M16 16l-1.5-1.5"/></svg> Markdown</button>
+              <button data-fmt="json"><svg viewBox="0 0 24 24" class="icon"><path d="M9 4H7a2 2 0 0 0-2 2v3a2 2 0 0 1-2 2 2 2 0 0 1 2 2v3a2 2 0 0 0 2 2h2M15 4h2a2 2 0 0 1 2 2v3a2 2 0 0 0 2 2 2 2 0 0 0-2 2v3a2 2 0 0 1-2 2h-2"/></svg> JSON</button>
+            </div>
+          </div>
+          <span class="dot" id="status-dot" title="index status"></span>
+        </div>
+      </div>
+
+      <div class="scroll" id="scroll">
+        <!-- welcome -->
+        <section class="welcome" id="welcome">
+          <h1>Welcome to KKEdu RAG</h1>
+          <p>Ask anything about your uploaded documents. Every answer is retrieved
+             from your files and checked by a verifier agent — accurate, never guessed.</p>
+
+          <div class="recents-head">Try asking</div>
+          <div class="recent-cards" id="suggestions">
+            <div class="recent-card" data-q="List all branches"><div class="t">List all branches</div><div class="s">See every documented item, grouped by type</div></div>
+            <div class="recent-card" data-q="Who is the chairman?"><div class="t">Who is the chairman?</div><div class="s">Pinpoint a specific fact from the corpus</div></div>
+            <div class="recent-card" data-q="How many institutions in total?"><div class="t">How many in total?</div><div class="s">Counts reconciled from stated figures</div></div>
+          </div>
+        </section>
+
+        <!-- messages -->
+        <div class="messages hide" id="messages"></div>
+      </div>
+
+      <!-- ───── gradient chat bar ───── -->
+      <div class="composer-wrap">
+        <form class="composer" id="composer">
+          <div class="composer-inner">
+            <div class="composer-strip"><span class="hint">Define. Ask. Verify. Grounded answers, powered by AI.</span></div>
+            <div class="composer-label">Smart Document Q&amp;A</div>
+            <textarea id="input" rows="1" placeholder="Type your question here…" autocomplete="off"></textarea>
+            <input type="file" id="file-input" multiple accept=".txt,.md,.text" hidden />
+            <div class="composer-row">
+              <div class="left">
+                <label class="tab-btn" for="file-input" id="attach-tab" style="cursor:pointer">
+                  <svg viewBox="0 0 24 24" class="icon"><path d="m21 8-9 9a5 5 0 0 1-7-7l9-9a3.5 3.5 0 1 1 5 5l-9 9a2 2 0 0 1-3-3l8-8"/></svg>
+                  Attach files
+                </label>
+                <div class="scope-select">
+                  <button type="button" class="tab-btn" id="scope-btn" data-menu="scope-menu">
+                    <svg viewBox="0 0 24 24" class="icon"><path d="M3 7h18M3 12h18M3 17h18"/></svg>
+                    <span id="scope-label">All files</span>
+                    <svg viewBox="0 0 24 24" class="icon"><path d="m6 9 6 6 6-6"/></svg>
+                  </button>
+                  <div class="menu scope-menu up" id="scope-menu" hidden></div>
+                </div>
+              </div>
+              <div class="right">
+                <button type="button" class="icon-btn" id="mic-btn" title="Voice (coming soon)">
+                  <svg viewBox="0 0 24 24" class="icon"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3zM5 11a7 7 0 0 0 14 0M12 18v4"/></svg>
+                </button>
+                <button type="submit" class="generate" id="send-btn">Generate <span class="spark">✦</span></button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </main>
+  </div>
+
+  <!-- ───────── Documents modal ───────── -->
+  <div class="modal-overlay" id="docs-modal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Documents">
+      <div class="modal-head">
+        <div>
+          <h3>Documents</h3>
+          <p id="modal-sub">Files indexed for grounded answers</p>
+        </div>
+        <button class="icon-btn" id="modal-close" aria-label="Close">
+          <svg viewBox="0 0 24 24" class="icon"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <label class="modal-drop" id="modal-drop" for="modal-file-input">
+        <input type="file" id="modal-file-input" multiple accept=".txt,.md,.text" hidden />
+        <svg viewBox="0 0 24 24" class="icon"><path d="M7 18a4 4 0 0 1-.8-7.9 5.5 5.5 0 0 1 10.7-1.6A4.5 4.5 0 0 1 17 18h-2"/><path d="M12 12v8m0-8-2.5 2.5M12 12l2.5 2.5"/></svg>
+        <span>Drop files here or <u>browse to add</u></span>
+        <small>Plain text · .txt .md</small>
+      </label>
+
+      <ul class="modal-list" id="modal-list"></ul>
+
+      <div class="modal-foot">
+        <span id="modal-count" class="muted"></span>
+        <label class="cta" for="modal-file-input" style="cursor:pointer">
+          <svg viewBox="0 0 24 24" class="icon"><path d="M12 5v14M5 12h14"/></svg> Add documents
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───────── Processing modal (upload + indexing) ───────── -->
+  <div class="modal-overlay" id="proc-modal" hidden>
+    <div class="proc-card" role="dialog" aria-modal="true" aria-label="Processing documents">
+      <div class="proc-orb" id="proc-orb">
+        <svg viewBox="0 0 24 24" class="icon" id="proc-glyph"><path d="M3 5.5A1.5 1.5 0 0 1 4.5 4H9a3 3 0 0 1 3 3 3 3 0 0 1 3-3h4.5A1.5 1.5 0 0 1 21 5.5v11a1.5 1.5 0 0 1-1.5 1.5H15a3 3 0 0 0-3 3 3 3 0 0 0-3-3H4.5A1.5 1.5 0 0 1 3 16.5z"/><path d="M12 7v13"/></svg>
+      </div>
+      <h3 id="proc-title">Processing documents</h3>
+      <p id="proc-files" class="proc-files"></p>
+
+      <div class="proc-bar"><span id="proc-fill"></span></div>
+
+      <ul class="proc-steps" id="proc-steps">
+        <li data-step="upload"><span class="tick"></span>Uploading files</li>
+        <li data-step="embed"><span class="tick"></span>Generating embeddings</li>
+        <li data-step="index"><span class="tick"></span>Indexing into vector store</li>
+        <li data-step="done"><span class="tick"></span>Ready</li>
+      </ul>
+
+      <div class="proc-result" id="proc-result" hidden></div>
+      <button class="cta" id="proc-close" hidden>Done</button>
+    </div>
+  </div>
+
+  <!-- ───────── Custom Confirm modal ───────── -->
+  <div class="modal-overlay" id="confirm-modal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Confirm">
+      <div class="modal-head">
+        <div>
+          <h3>Confirm Action</h3>
+          <p id="confirm-msg"></p>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <span class="uf-btns">
+          <button type="button" class="ghost-btn" id="confirm-cancel">Cancel</button>
+          <button type="button" class="cta sm" id="confirm-ok" style="background-color:#e0556a;border-color:#e0556a">Delete</button>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───────── Settings modal (tabbed: System · Users & Roles) ───────── -->
+  <div class="modal-overlay" id="settings-modal" hidden>
+    <div class="modal modal-wide" role="dialog" aria-modal="true" aria-label="Settings">
+      <div class="modal-head">
+        <div><h3>Settings</h3><p>Configure the system and manage who can use it</p></div>
+        <button class="icon-btn" id="settings-close" aria-label="Close">
+          <svg viewBox="0 0 24 24" class="icon"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="settings-tabs" id="settings-tabs">
+        <button class="stab on" data-tab="system" type="button">
+          <svg viewBox="0 0 24 24" class="icon"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          System
+        </button>
+        <button class="stab" data-tab="users" id="tab-users" type="button">
+          <svg viewBox="0 0 24 24" class="icon"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><path d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Users &amp; Roles
+        </button>
+      </div>
+
+      <div class="settings-body">
+        <!-- System pane -->
+        <section class="settings-pane on" data-pane="system">
+          <form class="settings-form" id="settings-form">
+            <div class="grp">LLM</div>
+            <label>Chat model<input name="chat_model" id="set-chat-model" list="model-list" /></label>
+            <datalist id="model-list"></datalist>
+            <label>Host (Ollama base URL)<input name="ollama_base_url" /></label>
+            <label>API key<input name="api_key" placeholder="ollama" /></label>
+            <label>Temperature<input name="temperature" type="number" step="0.1" min="0" max="2" /></label>
+
+            <div class="grp">Embeddings</div>
+            <label>Embedding model<input name="embed_model" /></label>
+            <label>Embedding dimensions<input name="embed_dim" type="number" /></label>
+
+            <div class="grp">Retrieval</div>
+            <label>Top-K passages<input name="top_k" type="number" min="1" /></label>
+            <label>Lexical weight (0–1)<input name="lexical_weight" type="number" step="0.05" min="0" max="1" /></label>
+            <label>Chunk size<input name="chunk_size" type="number" /></label>
+            <label>Chunk overlap<input name="chunk_overlap" type="number" /></label>
+
+            <div class="grp">Vector store</div>
+            <label>Backend<input name="vector_backend" /></label>
+          </form>
+        </section>
+
+        <!-- Users & Roles pane -->
+        <section class="settings-pane" data-pane="users">
+          <div class="users-toolbar">
+            <div><h4>Users &amp; Roles</h4><p class="muted" id="users-sub">—</p></div>
+            <button class="cta sm" id="user-add-btn" type="button">
+              <svg viewBox="0 0 24 24" class="icon"><path d="M12 5v14M5 12h14"/></svg> Add user
+            </button>
+          </div>
+
+          <form class="user-form" id="user-form" hidden>
+            <div class="uf-title" id="user-form-title">Add user</div>
+            <div class="uf-grid">
+              <label>Name<input name="name" autocomplete="off" placeholder="Full name" /></label>
+              <label>Email<input name="email" type="email" autocomplete="off" placeholder="name@company.com" /></label>
+              <label>Role
+                <select name="role" id="user-role">
+                  <option value="member">Member</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </label>
+            </div>
+            <div class="uf-perms-head">Permissions <span class="muted">(role sets the defaults; tune as needed)</span></div>
+            <div class="perm-checklist" id="perm-checklist"></div>
+            <div class="uf-foot">
+              <span class="muted" id="user-form-msg"></span>
+              <span class="uf-btns">
+                <button type="button" class="ghost-btn" id="user-cancel">Cancel</button>
+                <button type="submit" class="cta sm" id="user-save">Save user</button>
+              </span>
+            </div>
+          </form>
+
+          <ul class="users-list" id="users-list"></ul>
+        </section>
+      </div>
+
+      <div class="modal-foot" id="settings-foot">
+        <span id="settings-msg" class="muted"></span>
+        <button class="cta" id="settings-save">Save &amp; apply</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/app.js?v=11"></script>
+</body>
+</html>

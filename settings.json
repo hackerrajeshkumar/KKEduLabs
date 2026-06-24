@@ -1,0 +1,13 @@
+{
+  "chat_model": "gpt-oss:20b",
+  "embed_model": "nomic-embed-text",
+  "ollama_base_url": "http://localhost:11434/v1",
+  "api_key": "ollama",
+  "temperature": 0.1,
+  "top_k": 15,
+  "lexical_weight": 0.45,
+  "chunk_size": 1000,
+  "chunk_overlap": 200,
+  "vector_backend": "in-memory (numpy hybrid BM25 + cosine)",
+  "embed_dim": 768
+}

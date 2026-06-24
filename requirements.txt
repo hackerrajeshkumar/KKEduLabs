@@ -1,0 +1,11 @@
+# Pinned to floors verified to work on Python >= 3.12.
+# Note: openai-agents < 0.3 crashes on Python 3.11 (KeyError: ~TContext); use 3.12+.
+openai-agents>=0.17
+openai>=2.0
+numpy>=2.0
+pydantic>=2.0
+# Web UI (real-time streaming chat)
+fastapi>=0.110
+uvicorn>=0.27
+sse-starlette>=2.0
+python-multipart>=0.0.9
