@@ -4,9 +4,9 @@ Free functions with no instance state — unit-testable in isolation. ``store``
 composes them; they never import ``store`` (one-way dependency, no cycle).
 """
 from __future__ import annotations
+import math
 import re
 from collections import Counter
-import numpy as np
 from ..core.config import CHUNK_SIZE, CHUNK_OVERLAP
 
 # Common English words carry no retrieval signal; dropping them from the QUERY
@@ -62,10 +62,10 @@ def chunk(title: str, body: str) -> list[str]:
     return [tag + p.strip() for p in parts if p.strip()]
 
 
-def bm25_scores(query: str, n: int, tokens: list[Counter], df: Counter) -> np.ndarray:
+def bm25_scores(query: str, n: int, tokens: list[Counter], df: Counter) -> list[float]:
     """BM25 keyword scores over all chunks — catches exact terms (names, titles,
     IDs) that semantic search ranks low. Returns one score per chunk."""
-    scores = np.zeros(n, dtype=np.float32)
+    scores = [0.0] * n
     terms = set(tokenize(query)) - STOPWORDS           # keep meaningful terms
     if not terms:                                      # query was all stopwords
         terms = set(tokenize(query))                   # fall back to raw tokens
@@ -77,7 +77,7 @@ def bm25_scores(query: str, n: int, tokens: list[Counter], df: Counter) -> np.nd
         d = df.get(term, 0)
         if d == 0:
             continue
-        idf = np.log(1 + (n - d + 0.5) / (d + 0.5))    # rarer term -> higher idf
+        idf = math.log(1 + (n - d + 0.5) / (d + 0.5))  # rarer term -> higher idf
         for i, tf in enumerate(tokens):
             f = tf.get(term, 0)
             if f:
@@ -86,7 +86,11 @@ def bm25_scores(query: str, n: int, tokens: list[Counter], df: Counter) -> np.nd
     return scores
 
 
-def min_max_norm(a: np.ndarray) -> np.ndarray:
+def min_max_norm(a: list[float]) -> list[float]:
     """Min-max to [0,1] so semantic and lexical scores blend on one scale."""
-    lo, hi = float(a.min()), float(a.max())
-    return (a - lo) / (hi - lo) if hi > lo else np.zeros_like(a)
+    if not a:
+        return []
+    lo, hi = min(a), max(a)
+    if hi > lo:
+        return [(v - lo) / (hi - lo) for v in a]
+    return [0.0] * len(a)

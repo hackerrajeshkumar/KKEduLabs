@@ -14,6 +14,7 @@ rag_memory.db-wal
 *.db
 *.db-shm
 *.db-wal
+lancedb_store/
 
 # OS / editor
 .DS_Store

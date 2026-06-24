@@ -23,16 +23,30 @@ def remove_document(store, source: str) -> bool:
     """Drop every chunk/title belonging to one source file; rebuild the index."""
     if source not in store.chunk_origin and source not in store.title_origin:
         return False
+
+    # Delete from LanceDB
+    if store._table is not None:
+        safe_source = source.replace("'", "''")
+        store._table.delete(f"chunk_origin = '{safe_source}'")
+        try:
+            if store._table.count_rows() == 0:
+                store._db.drop_table("chunks")
+                store._table = None
+        except Exception:
+            store._table = None
+
+    # Shift parallel arrays
     keep = [i for i, s in enumerate(store.chunk_origin) if s != source]
     store.chunks = [store.chunks[i] for i in keep]
     store.sources = [store.sources[i] for i in keep]
     store.tokens = [store.tokens[i] for i in keep]
     store.chunk_origin = [store.chunk_origin[i] for i in keep]
-    store.matrix = store.matrix[keep] if store.matrix is not None and keep else None
+
     tkeep = [i for i, s in enumerate(store.title_origin) if s != source]
     store.titles = [store.titles[i] for i in tkeep]
     store.type_labels = [store.type_labels[i] for i in tkeep]
     store.title_origin = [store.title_origin[i] for i in tkeep]
+
     store.df = Counter()                               # rebuild document frequencies
     for tf in store.tokens:
         store.df.update(tf.keys())

@@ -22,7 +22,7 @@ The system utilizes an inward-facing layered architecture with explicit boundari
 ```mermaid
 graph TD
     subgraph Data Ingestion
-        A[Plain Text Documents] -->|Chunking & Parsing| B(In-Memory VectorStore)
+        A[Plain Text Documents] -->|Chunking & Parsing| B(LanceDB Vector Store)
         B -->|Embeddings| C[Ollama 'nomic-embed-text']
         B -->|BM25 Tokens| D[Lexical TF/IDF Counter]
     end
@@ -51,7 +51,7 @@ graph TD
 | **LLM Inference** | Ollama | Local model hosting & inference engine. |
 | **Chat Model** | `gpt-oss:20b-cloud` | Reasoning, drafting, and tool-calling model. |
 | **Embedding Model** | `nomic-embed-text` | High-quality 768-dimensional text embeddings. |
-| **Vector Search** | FAISS & NumPy | In-memory FAISS indexing (`IndexFlatIP`) handling NumPy arrays. |
+| **Vector Database** | LanceDB | On-disk columnar vector store with native cosine similarity search. |
 | **Lexical Search** | Python `collections.Counter` | Term Frequency calculation for BM25. |
 | **Database** | SQLite (`rag_memory.db`) | Persistent conversation memory. |
 | **Web Server** | FastAPI | High-performance async API and SSE streaming layer. |
@@ -72,17 +72,17 @@ Documents are split using a strict, character-based sliding window approach to b
 
 ## Vector Database Design
 
-The project utilizes a highly-optimized **Hybrid Vector Store** powered by **FAISS**:
-- **Semantic Indexing**: Embeddings are indexed using `faiss-cpu` (`faiss.IndexFlatIP`) for extreme efficiency and scalability when retrieving approximate nearest neighbors via inner-product (cosine similarity on normalized vectors).
+The project utilizes a **Hybrid Vector Store** powered by **LanceDB**:
+- **Semantic Indexing**: Embeddings are stored in a LanceDB on-disk columnar table. Similarity search is performed natively using LanceDB's built-in cosine distance metric, eliminating the need for manual matrix operations.
 - **Lexical Indexing**: Chunk token frequencies are maintained using Python's `collections.Counter`, alongside a Document Frequency (DF) counter for Inverse Document Frequency (IDF) scoring.
-- **Idempotency**: Documents are tracked by source filename. Re-indexing a file seamlessly leverages FAISS `IDSelectorBatch` to dynamically remove prior document chunks without rebuilding the entire matrix, preventing duplicate weighting and preserving application performance.
+- **Idempotency**: Documents are tracked by source filename. Re-indexing a file uses LanceDB's SQL-style `DELETE` filter to remove prior document chunks cleanly, preventing duplicate weighting.
 
 ## Retrieval Workflow
 
 1. **Query Processing**: The user's query is embedded using `nomic-embed-text` with the `search_query:` prefix.
 2. **Dual-Scoring**:
-   - *Semantic Score*: Cosine similarity is calculated against the chunk matrix.
-   - *Lexical Score*: BM25 scoring isolates exact keyword matches.
+   - *Semantic Score*: LanceDB retrieves the top 1000 candidates ranked by cosine similarity.
+   - *Lexical Score*: BM25 scoring isolates exact keyword matches across all indexed chunks.
 3. **Normalization & Fusion**: Both scores are normalized using Min-Max scaling to a `[0,1]` range and blended linearly (`Lexical Weight = 0.45`).
 4. **Ranking**: The top `K=15` highest-scoring chunks are returned to the Answerer agent as formatted evidence.
 
@@ -101,7 +101,7 @@ kkedu_rag/
 ├── runtime/      # Bootstrap side-effects (tracing, stdout wrappers)
 ├── core/         # Configuration, prompts, pure data sanitization
 ├── llm/          # Ollama shared AsyncOpenAI client singleton
-├── retrieval/    # Hybrid indexing, BM25 logic, VectorStore (FAISS & NumPy)
+├── retrieval/    # Hybrid indexing, BM25 logic, VectorStore (LanceDB)
 ├── verification/ # Schema parsing and validation gates against hallucination
 ├── agents/       # Definition of Answerer and Verifier agents
 ├── services/     # Ingestion pipelines and one-turn Q&A logic
@@ -183,7 +183,4 @@ We started with a small school, few students, one Velammal Educational Trust and
 
 ## Limitations
 
-- **In-Memory Constraints**: The VectorStore loads the `NumPy` matrix entirely into memory. While highly performant, it scales poorly to millions of documents without migrating to an on-disk vector database (e.g., Milvus, Qdrant).
 - **Single-Turn Embedding Batching**: Currently, bulk ingesting extremely large files blocks the event loop momentarily while `EMBED_BATCH` constraints parse chunks.
-
-
