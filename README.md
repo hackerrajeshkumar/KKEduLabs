@@ -186,9 +186,4 @@ We started with a small school, few students, one Velammal Educational Trust and
 - **In-Memory Constraints**: The VectorStore loads the `NumPy` matrix entirely into memory. While highly performant, it scales poorly to millions of documents without migrating to an on-disk vector database (e.g., Milvus, Qdrant).
 - **Single-Turn Embedding Batching**: Currently, bulk ingesting extremely large files blocks the event loop momentarily while `EMBED_BATCH` constraints parse chunks.
 
-## Future Improvements
 
-- **Dedicated Vector Database**: Migration from the NumPy `VectorStore` to a production vector DB like Pinecone, Qdrant, or Postgres (pgvector) to support horizontal scaling.
-- **Advanced Reranking**: Implementing a Cross-Encoder step (e.g., Cohere Rerank) after the initial Top-K hybrid retrieval to further sort context by absolute relevance.
-- **Metadata Filtering**: Extending the CLI and UI to allow user-driven pre-filtering (e.g., "Only search documents categorized as 'HR'").
-- **Multi-modal Support**: Adding parsing pipelines for PDFs, docx, and structured CSV ingestion.
